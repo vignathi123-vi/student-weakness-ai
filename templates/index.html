@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Weak Topic Detector</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; }
+        h1 { color: #2c3e50; }
+        button { background: #2c3e50; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px; }
+        #result { margin-top: 20px; padding: 15px; background: #f4f4f4; border-radius: 5px; white-space: pre-wrap; }
+        .weak { color: #c0392b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>📊 Student Weak-Topic Diagnosis Agent</h1>
+    <p>Click below to run a sample diagnosis (Algebra: weak / Geometry: strong):</p>
+    <button onclick="runDemo()">Run Diagnosis</button>
+    <div id="result"></div>
+
+    <script>
+        async function runDemo() {
+            document.getElementById('result').innerText = "Analyzing... please wait (may take 30s on first run)";
+            const demoData = {
+                answers: [
+                    {topic: "Algebra", is_correct: 0, mistake_type: "conceptual", time_taken_sec: 160, expected_time_sec: 100},
+                    {topic: "Algebra", is_correct: 0, mistake_type: "conceptual", time_taken_sec: 150, expected_time_sec: 100},
+                    {topic: "Algebra", is_correct: 1, mistake_type: "none", time_taken_sec: 120, expected_time_sec: 100},
+                    {topic: "Geometry", is_correct: 1, mistake_type: "none", time_taken_sec: 80, expected_time_sec: 100},
+                    {topic: "Geometry", is_correct: 1, mistake_type: "none", time_taken_sec: 85, expected_time_sec: 100},
+                    {topic: "Geometry", is_correct: 0, mistake_type: "silly", time_taken_sec: 70, expected_time_sec: 100}
+                ]
+            };
+            const res = await fetch('/diagnose', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(demoData)
+            });
+            const data = await res.json();
+            let output = `${data.total_weak} weak topic(s) found:\n\n`;
+            data.weak_topics.forEach(t => {
+                output += `⚠ ${t.topic} — ${(t.confidence*100).toFixed(0)}% confidence\n`;
+                output += `   Mainly ${t.main_reason} mistakes, ${t.time_ratio}x expected time\n\n`;
+            });
+            document.getElementById('result').innerText = output;
+        }
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import pandas as pd
 import joblib
 
@@ -41,7 +41,9 @@ def diagnose(answer_rows):
             "time_ratio": round(float(row["avg_time_ratio"]), 2)
         })
     return {"weak_topics": results, "total_weak": len(results)}
-
+@app.route("/")
+def home():
+    return render_template("index.html")
 @app.route("/diagnose", methods=["POST"])
 def diagnose_endpoint():
     data = request.get_json()
