@@ -1,12 +1,12 @@
 # Concepto
 
-An AI agent that analyzes a student's written test answers and identifies exactly which underlying concept they're weak in — not just the broad topic. For example, instead of saying "weak in Algebra," it identifies "weak in factorial simplification" or "weak in trigonometric table values," along with whether the mistake looks like a conceptual gap or a careless calculation slip.
+An AI agent that analyzes a student's written test answers and identifies exactly which underlying concept they're weak in, not just the broad topic. For example, instead of saying "weak in Algebra," it identifies "weak in factorial simplification" or "weak in trigonometric table values," along with whether the mistake looks like a conceptual gap or a careless calculation slip.
 
 **Live demo:** https://student-weakness-ai.onrender.com
 
 ## Why this exists
 
-Marks alone don't tell a student or teacher why a mistake happened. Two students can both get a question wrong for completely different reasons — one has a real gap in understanding, the other made a careless slip despite knowing the method. This agent tells those two cases apart.
+Marks alone don't tell a student or teacher why a mistake happened. Two students can both get a question wrong for completely different reasons, one has a real gap in understanding, the other made a careless slip despite knowing the method. This agent tells those two cases apart.
 
 ## How it works
 
