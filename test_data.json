@@ -1,7 +1,0 @@
-{
-  "answers": [
-    {"topic": "Algebra", "is_correct": 0, "mistake_type": "conceptual", "time_taken_sec": 160, "expected_time_sec": 100},
-    {"topic": "Algebra", "is_correct": 0, "mistake_type": "conceptual", "time_taken_sec": 150, "expected_time_sec": 100},
-    {"topic": "Algebra", "is_correct": 1, "mistake_type": "none", "time_taken_sec": 120, "expected_time_sec": 100}
-  ]
-}
