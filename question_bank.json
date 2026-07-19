@@ -1,0 +1,76 @@
+{
+  "questions": [
+    {
+      "id": "Q1",
+      "topic": "Algebra",
+      "concept": "Factorial simplification",
+      "question_text": "Simplify: 7! / 5!",
+      "required_elements": ["7", "6", "42"],
+      "partial_credit_elements": ["7", "6"],
+      "correct_final_answer": "42"
+    },
+    {
+      "id": "Q2",
+      "topic": "Algebra",
+      "concept": "Factorial simplification",
+      "question_text": "Simplify: n! / (n-2)!",
+      "required_elements": ["n", "n-1", "n(n-1)"],
+      "partial_credit_elements": ["n", "n-1"],
+      "correct_final_answer": "n(n-1)"
+    },
+    {
+      "id": "Q3",
+      "topic": "Geometry",
+      "concept": "Angle-sum property",
+      "question_text": "Two angles of a triangle are 50 and 60 degrees. Find the third angle.",
+      "required_elements": ["180", "50", "60", "70"],
+      "partial_credit_elements": ["180"],
+      "correct_final_answer": "70"
+    },
+    {
+      "id": "Q4",
+      "topic": "Geometry",
+      "concept": "Angle-sum property",
+      "question_text": "In triangle ABC, angle A is 90 and angle B is 30. Find angle C.",
+      "required_elements": ["180", "90", "30", "60"],
+      "partial_credit_elements": ["180"],
+      "correct_final_answer": "60"
+    },
+    {
+      "id": "Q5",
+      "topic": "Trigonometry",
+      "concept": "Trigonometric table values",
+      "question_text": "Find the value of sin30 + cos60",
+      "required_elements": ["0.5", "0.5", "1"],
+      "partial_credit_elements": ["0.5"],
+      "correct_final_answer": "1"
+    },
+    {
+      "id": "Q6",
+      "topic": "Trigonometry",
+      "concept": "Trigonometric table values",
+      "question_text": "Find the value of tan45 + sin90",
+      "required_elements": ["1", "1", "2"],
+      "partial_credit_elements": ["1"],
+      "correct_final_answer": "2"
+    },
+    {
+      "id": "Q7",
+      "topic": "Algebra",
+      "concept": "Quadratic formula application",
+      "question_text": "Solve: x^2 - 5x + 6 = 0",
+      "required_elements": ["x-2", "x-3", "2", "3"],
+      "partial_credit_elements": ["x-2", "x-3"],
+      "correct_final_answer": "2, 3"
+    },
+    {
+      "id": "Q8",
+      "topic": "Algebra",
+      "concept": "Quadratic formula application",
+      "question_text": "Solve: x^2 - 7x + 12 = 0",
+      "required_elements": ["x-3", "x-4", "3", "4"],
+      "partial_credit_elements": ["x-3", "x-4"],
+      "correct_final_answer": "3, 4"
+    }
+  ]
+}

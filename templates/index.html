@@ -1,121 +1,116 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Weak-Topic Diagnosis Agent</title>
+    <title>Concept-Level Weakness Diagnosis Agent</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         * { box-sizing: border-box; }
         body {
             font-family: -apple-system, Segoe UI, Arial, sans-serif;
-            max-width: 640px; margin: 0 auto; padding: 40px 20px;
+            max-width: 700px; margin: 0 auto; padding: 40px 20px;
             background: #f7f8fa; color: #1a1a1a;
         }
-        h1 { font-size: 24px; margin-bottom: 4px; }
-        .subtitle { color: #666; margin-bottom: 28px; font-size: 14px; }
-        .card {
-            background: white; border-radius: 12px; padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 16px;
+        h1 { font-size: 22px; margin-bottom: 4px; }
+        .subtitle { color: #666; margin-bottom: 24px; font-size: 14px; }
+        .question-card {
+            background: white; border-radius: 10px; padding: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 14px;
         }
-        select, button {
-            font-size: 15px; padding: 10px 16px; border-radius: 8px;
-            border: 1px solid #ddd; margin-right: 8px;
+        .q-label { font-weight: 700; font-size: 13px; color: #888; }
+        .q-text { font-size: 15px; margin: 6px 0 10px; }
+        textarea {
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;
+            font-size: 14px; font-family: inherit; resize: vertical; min-height: 50px;
         }
         button {
-            background: #2c3e50; color: white; border: none; cursor: pointer;
-            font-weight: 600; transition: background 0.2s;
+            background: #2c3e50; color: white; border: none; padding: 12px 24px;
+            border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer;
+            width: 100%; margin-top: 8px;
         }
         button:hover { background: #1a252f; }
-        button:disabled { background: #aaa; cursor: not-allowed; }
-        .scenario { margin-bottom: 16px; }
-        .scenario label { display: block; margin-bottom: 6px; font-size: 13px; color: #666; }
-        #loading { display: none; color: #666; font-size: 14px; padding: 12px 0; }
-        .spinner {
-            display: inline-block; width: 14px; height: 14px; border: 2px solid #ddd;
-            border-top-color: #2c3e50; border-radius: 50%; animation: spin 0.8s linear infinite;
-            margin-right: 8px; vertical-align: middle;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        button:disabled { background: #aaa; }
+        #loading { display: none; text-align: center; color: #666; padding: 16px 0; }
         .result-card {
             border-left: 4px solid #e74c3c; background: #fdf2f0; border-radius: 8px;
-            padding: 16px; margin-bottom: 12px;
+            padding: 14px 16px; margin-bottom: 10px;
         }
-        .result-card.ok { border-left-color: #27ae60; background: #f0f9f2; }
-        .topic-name { font-weight: 700; font-size: 16px; }
-        .confidence { float: right; color: #e74c3c; font-weight: 600; }
-        .detail { color: #555; font-size: 14px; margin-top: 6px; }
-        .plan { margin-top: 8px; font-size: 14px; color: #2c3e50; font-style: italic; }
-        .summary { color: #666; font-size: 13px; margin-top: 16px; }
+        .result-card.strong { border-left-color: #27ae60; background: #f0f9f2; }
+        .result-card.partial { border-left-color: #f39c12; background: #fef7ec; }
+        .concept-name { font-weight: 700; font-size: 15px; }
+        .status-badge { float: right; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 12px; }
+        .status-badge.Weak { background: #e74c3c; color: white; }
+        .status-badge.Strong { background: #27ae60; color: white; }
+        .status-badge.Partial { background: #f39c12; color: white; }
+        .reason { font-size: 13px; color: #555; margin-top: 6px; }
+        #results { margin-top: 24px; }
     </style>
 </head>
 <body>
-    <h1>📊 Weak-Topic Diagnosis Agent</h1>
-    <div class="subtitle">Diagnoses which topics a student is weak in — and why — from their test answer patterns.</div>
+    <h1>📝 Concept-Level Weakness Diagnosis</h1>
+    <div class="subtitle">Type each answer as the student wrote it. The agent identifies exactly which concept is weak — not just the topic.</div>
 
-    <div class="card">
-        <div class="scenario">
-            <label>Choose a student scenario:</label>
-            <select id="scenario">
-                <option value="algebra_weak">Student A — struggling with Algebra concepts</option>
-                <option value="all_strong">Student B — performing well across topics</option>
-                <option value="careless">Student C — strong knowledge, careless mistakes</option>
-            </select>
-        </div>
-        <button onclick="runDiagnosis()" id="runBtn">Run Diagnosis</button>
-    </div>
-
-    <div id="loading"><span class="spinner"></span>Analyzing answer patterns... (first request may take up to 40s to wake the server)</div>
+    <div id="questionForm"></div>
+    <button onclick="submitAnswers()" id="submitBtn">Diagnose</button>
+    <div id="loading">Analyzing answers... (first request may take up to 40s)</div>
     <div id="results"></div>
 
     <script>
-        const scenarios = {
-            algebra_weak: [
-                {topic: "Algebra", is_correct: 0, mistake_type: "conceptual", time_taken_sec: 160, expected_time_sec: 100},
-                {topic: "Algebra", is_correct: 0, mistake_type: "conceptual", time_taken_sec: 150, expected_time_sec: 100},
-                {topic: "Algebra", is_correct: 1, mistake_type: "none", time_taken_sec: 120, expected_time_sec: 100},
-                {topic: "Geometry", is_correct: 1, mistake_type: "none", time_taken_sec: 80, expected_time_sec: 100},
-                {topic: "Geometry", is_correct: 1, mistake_type: "none", time_taken_sec: 85, expected_time_sec: 100},
-                {topic: "Geometry", is_correct: 0, mistake_type: "silly", time_taken_sec: 70, expected_time_sec: 100}
-            ],
-            all_strong: [
-                {topic: "Algebra", is_correct: 1, mistake_type: "none", time_taken_sec: 90, expected_time_sec: 100},
-                {topic: "Algebra", is_correct: 1, mistake_type: "none", time_taken_sec: 85, expected_time_sec: 100},
-                {topic: "Geometry", is_correct: 1, mistake_type: "none", time_taken_sec: 80, expected_time_sec: 100},
-                {topic: "Geometry", is_correct: 0, mistake_type: "silly", time_taken_sec: 75, expected_time_sec: 100}
-            ],
-            careless: [
-                {topic: "Trigonometry", is_correct: 0, mistake_type: "silly", time_taken_sec: 60, expected_time_sec: 100},
-                {topic: "Trigonometry", is_correct: 0, mistake_type: "silly", time_taken_sec: 65, expected_time_sec: 100},
-                {topic: "Trigonometry", is_correct: 1, mistake_type: "none", time_taken_sec: 70, expected_time_sec: 100},
-                {topic: "Trigonometry", is_correct: 0, mistake_type: "silly", time_taken_sec: 55, expected_time_sec: 100}
-            ]
-        };
+        let questions = [];
 
-        async function runDiagnosis() {
-            const btn = document.getElementById('runBtn');
+        async function loadQuestions() {
+            const res = await fetch('/questions');
+            questions = await res.json();
+            const form = document.getElementById('questionForm');
+            form.innerHTML = questions.map(q => `
+                <div class="question-card">
+                    <div class="q-label">${q.id} — ${q.topic}</div>
+                    <div class="q-text">${q.question_text}</div>
+                    <textarea id="answer_${q.id}" placeholder="Type the student's answer here..."></textarea>
+                </div>
+            `).join('');
+        }
+
+        async function submitAnswers() {
+            const btn = document.getElementById('submitBtn');
             const loading = document.getElementById('loading');
             const results = document.getElementById('results');
             btn.disabled = true;
             loading.style.display = 'block';
             results.innerHTML = '';
 
-            const chosen = document.getElementById('scenario').value;
+            const answers = {};
+            questions.forEach(q => {
+                answers[q.id] = document.getElementById(`answer_${q.id}`).value || "";
+            });
+
             try {
                 const res = await fetch('/diagnose', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({answers: scenarios[chosen]})
+                    body: JSON.stringify({answers: answers})
                 });
                 const data = await res.json();
                 loading.style.display = 'none';
                 btn.disabled = false;
 
-                if (data.total_weak === 0) {
-                    results.innerHTML = `<div class="result-card ok"><span class="topic-name">✅ No weak topics detected</span><div class="detail">This student is performing consistently across all topics.</div></div>`;
-                    return;
-                }
+                results.innerHTML = '<h3>Diagnosis Report</h3>' + data.diagnosis.map(c => {
+                    const cls = c.status === 'Strong' ? 'strong' : c.status === 'Partial gap' ? 'partial' : '';
+                    const badgeClass = c.status === 'Strong' ? 'Strong' : c.status === 'Partial gap' ? 'Partial' : 'Weak';
+                    return `
+                        <div class="result-card ${cls}">
+                            <span class="concept-name">${c.concept}</span>
+                            <span class="status-badge ${badgeClass}">${c.status}</span>
+                            <div class="reason">${c.reason} (score: ${c.score})</div>
+                        </div>`;
+                }).join('');
+            } catch (err) {
+                loading.style.display = 'none';
+                btn.disabled = false;
+                results.innerHTML = '<div class="result-card">Error reaching the agent. Try again shortly.</div>';
+            }
+        }
 
-                data.weak_topics.forEach(t => {
-                    results.innerHTML += `
-                        <div class="result-card">
-                            <span class="topic-name">⚠ ${t.topic}</span>
-                            <span class="confidence">${(t.confidence*100).toFixed(0)}% confidence</span>
+        loadQuestions();
+    </script>
+</body>
+</html>
