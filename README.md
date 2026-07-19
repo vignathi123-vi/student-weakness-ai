@@ -1,10 +1,10 @@
-\# Concept-Level Student Weakness Diagnosis Agent
+\# Concepto
 
 
 
 An AI agent that analyzes a student's written test answers and identifies exactly
 
-which underlying concept they're weak in — not just the broad topic. For example,
+which underlying concept they're weak in. Not just the broad topic. For example,
 
 instead of saying "weak in Algebra," it identifies "weak in factorial simplification"
 
@@ -24,7 +24,7 @@ conceptual gap or a careless calculation slip.
 
 Marks alone don't tell a student or teacher \*why\* a mistake happened. Two students
 
-can both get a question wrong for completely different reasons — one has a real gap
+can both get a question wrong for completely different reasons, one has a real gap
 
 in understanding, the other made a careless slip despite knowing the method. This
 
@@ -36,15 +36,15 @@ agent tells those two cases apart.
 
 
 
-1\. \*\*Question Bank\*\* — each question is pre-tagged with the specific concept it
+1\. \*\*Question Bank\*\*  each question is pre-tagged with the specific concept it
 
 &#x20;  tests, plus the key terms/values a correct answer must contain.
 
-2\. \*\*Answer Matching\*\* — a student's typed answer is checked against the required
+2\. \*\*Answer Matching\*\*  a student's typed answer is checked against the required
 
 &#x20;  elements for that question (full match / partial match / missing).
 
-3\. \*\*Concept-Level Diagnosis\*\* — results are aggregated by concept (not by topic),
+3\. \*\*Concept-Level Diagnosis\*\*  results are aggregated by concept (not by topic),
 
 &#x20;  producing a status (Strong / Partial Gap / Weak) and a specific reason.
 
@@ -64,7 +64,7 @@ distinguishes:
 
 \- A student who gets the \*method\* right but the \*final value\* wrong (a slip, not a
 
-&#x20; conceptual gap) — flagged differently from a true gap
+&#x20; conceptual gap) flagged differently from a true gap
 
 
 
@@ -76,13 +76,13 @@ distinguishes:
 
 \- \*\*Matching engine:\*\* rule-based text matching against a pre-tagged question bank
 
-\- \*\*Frontend:\*\* plain HTML/CSS/JS (no framework) — question form + diagnosis report
+\- \*\*Frontend:\*\* plain HTML/CSS/JS (no framework)  question form + diagnosis report
 
 \- \*\*Deployment:\*\* Render (free tier)
 
 \- \*\*Prior phase:\*\* an earlier ML model (Extra Trees Classifier, 86.7% accuracy)
 
-&#x20; trained on simulated topic-level answer-sheet data — kept in this repo under
+&#x20; trained on simulated topic-level answer-sheet data, kept in this repo under
 
 &#x20; `weak\_topic\_model\_training.ipynb` as the foundational experiment this project
 
