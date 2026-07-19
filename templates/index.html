@@ -1,47 +1,121 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student Weak Topic Detector</title>
+    <title>Weak-Topic Diagnosis Agent</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; }
-        h1 { color: #2c3e50; }
-        button { background: #2c3e50; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px; }
-        #result { margin-top: 20px; padding: 15px; background: #f4f4f4; border-radius: 5px; white-space: pre-wrap; }
-        .weak { color: #c0392b; font-weight: bold; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, Segoe UI, Arial, sans-serif;
+            max-width: 640px; margin: 0 auto; padding: 40px 20px;
+            background: #f7f8fa; color: #1a1a1a;
+        }
+        h1 { font-size: 24px; margin-bottom: 4px; }
+        .subtitle { color: #666; margin-bottom: 28px; font-size: 14px; }
+        .card {
+            background: white; border-radius: 12px; padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 16px;
+        }
+        select, button {
+            font-size: 15px; padding: 10px 16px; border-radius: 8px;
+            border: 1px solid #ddd; margin-right: 8px;
+        }
+        button {
+            background: #2c3e50; color: white; border: none; cursor: pointer;
+            font-weight: 600; transition: background 0.2s;
+        }
+        button:hover { background: #1a252f; }
+        button:disabled { background: #aaa; cursor: not-allowed; }
+        .scenario { margin-bottom: 16px; }
+        .scenario label { display: block; margin-bottom: 6px; font-size: 13px; color: #666; }
+        #loading { display: none; color: #666; font-size: 14px; padding: 12px 0; }
+        .spinner {
+            display: inline-block; width: 14px; height: 14px; border: 2px solid #ddd;
+            border-top-color: #2c3e50; border-radius: 50%; animation: spin 0.8s linear infinite;
+            margin-right: 8px; vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .result-card {
+            border-left: 4px solid #e74c3c; background: #fdf2f0; border-radius: 8px;
+            padding: 16px; margin-bottom: 12px;
+        }
+        .result-card.ok { border-left-color: #27ae60; background: #f0f9f2; }
+        .topic-name { font-weight: 700; font-size: 16px; }
+        .confidence { float: right; color: #e74c3c; font-weight: 600; }
+        .detail { color: #555; font-size: 14px; margin-top: 6px; }
+        .plan { margin-top: 8px; font-size: 14px; color: #2c3e50; font-style: italic; }
+        .summary { color: #666; font-size: 13px; margin-top: 16px; }
     </style>
 </head>
 <body>
-    <h1>📊 Student Weak-Topic Diagnosis Agent</h1>
-    <p>Click below to run a sample diagnosis (Algebra: weak / Geometry: strong):</p>
-    <button onclick="runDemo()">Run Diagnosis</button>
-    <div id="result"></div>
+    <h1>📊 Weak-Topic Diagnosis Agent</h1>
+    <div class="subtitle">Diagnoses which topics a student is weak in — and why — from their test answer patterns.</div>
+
+    <div class="card">
+        <div class="scenario">
+            <label>Choose a student scenario:</label>
+            <select id="scenario">
+                <option value="algebra_weak">Student A — struggling with Algebra concepts</option>
+                <option value="all_strong">Student B — performing well across topics</option>
+                <option value="careless">Student C — strong knowledge, careless mistakes</option>
+            </select>
+        </div>
+        <button onclick="runDiagnosis()" id="runBtn">Run Diagnosis</button>
+    </div>
+
+    <div id="loading"><span class="spinner"></span>Analyzing answer patterns... (first request may take up to 40s to wake the server)</div>
+    <div id="results"></div>
 
     <script>
-        async function runDemo() {
-            document.getElementById('result').innerText = "Analyzing... please wait (may take 30s on first run)";
-            const demoData = {
-                answers: [
-                    {topic: "Algebra", is_correct: 0, mistake_type: "conceptual", time_taken_sec: 160, expected_time_sec: 100},
-                    {topic: "Algebra", is_correct: 0, mistake_type: "conceptual", time_taken_sec: 150, expected_time_sec: 100},
-                    {topic: "Algebra", is_correct: 1, mistake_type: "none", time_taken_sec: 120, expected_time_sec: 100},
-                    {topic: "Geometry", is_correct: 1, mistake_type: "none", time_taken_sec: 80, expected_time_sec: 100},
-                    {topic: "Geometry", is_correct: 1, mistake_type: "none", time_taken_sec: 85, expected_time_sec: 100},
-                    {topic: "Geometry", is_correct: 0, mistake_type: "silly", time_taken_sec: 70, expected_time_sec: 100}
-                ]
-            };
-            const res = await fetch('/diagnose', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(demoData)
-            });
-            const data = await res.json();
-            let output = `${data.total_weak} weak topic(s) found:\n\n`;
-            data.weak_topics.forEach(t => {
-                output += `⚠ ${t.topic} — ${(t.confidence*100).toFixed(0)}% confidence\n`;
-                output += `   Mainly ${t.main_reason} mistakes, ${t.time_ratio}x expected time\n\n`;
-            });
-            document.getElementById('result').innerText = output;
-        }
-    </script>
-</body>
-</html>
+        const scenarios = {
+            algebra_weak: [
+                {topic: "Algebra", is_correct: 0, mistake_type: "conceptual", time_taken_sec: 160, expected_time_sec: 100},
+                {topic: "Algebra", is_correct: 0, mistake_type: "conceptual", time_taken_sec: 150, expected_time_sec: 100},
+                {topic: "Algebra", is_correct: 1, mistake_type: "none", time_taken_sec: 120, expected_time_sec: 100},
+                {topic: "Geometry", is_correct: 1, mistake_type: "none", time_taken_sec: 80, expected_time_sec: 100},
+                {topic: "Geometry", is_correct: 1, mistake_type: "none", time_taken_sec: 85, expected_time_sec: 100},
+                {topic: "Geometry", is_correct: 0, mistake_type: "silly", time_taken_sec: 70, expected_time_sec: 100}
+            ],
+            all_strong: [
+                {topic: "Algebra", is_correct: 1, mistake_type: "none", time_taken_sec: 90, expected_time_sec: 100},
+                {topic: "Algebra", is_correct: 1, mistake_type: "none", time_taken_sec: 85, expected_time_sec: 100},
+                {topic: "Geometry", is_correct: 1, mistake_type: "none", time_taken_sec: 80, expected_time_sec: 100},
+                {topic: "Geometry", is_correct: 0, mistake_type: "silly", time_taken_sec: 75, expected_time_sec: 100}
+            ],
+            careless: [
+                {topic: "Trigonometry", is_correct: 0, mistake_type: "silly", time_taken_sec: 60, expected_time_sec: 100},
+                {topic: "Trigonometry", is_correct: 0, mistake_type: "silly", time_taken_sec: 65, expected_time_sec: 100},
+                {topic: "Trigonometry", is_correct: 1, mistake_type: "none", time_taken_sec: 70, expected_time_sec: 100},
+                {topic: "Trigonometry", is_correct: 0, mistake_type: "silly", time_taken_sec: 55, expected_time_sec: 100}
+            ]
+        };
+
+        async function runDiagnosis() {
+            const btn = document.getElementById('runBtn');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            btn.disabled = true;
+            loading.style.display = 'block';
+            results.innerHTML = '';
+
+            const chosen = document.getElementById('scenario').value;
+            try {
+                const res = await fetch('/diagnose', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({answers: scenarios[chosen]})
+                });
+                const data = await res.json();
+                loading.style.display = 'none';
+                btn.disabled = false;
+
+                if (data.total_weak === 0) {
+                    results.innerHTML = `<div class="result-card ok"><span class="topic-name">✅ No weak topics detected</span><div class="detail">This student is performing consistently across all topics.</div></div>`;
+                    return;
+                }
+
+                data.weak_topics.forEach(t => {
+                    results.innerHTML += `
+                        <div class="result-card">
+                            <span class="topic-name">⚠ ${t.topic}</span>
+                            <span class="confidence">${(t.confidence*100).toFixed(0)}% confidence</span>
