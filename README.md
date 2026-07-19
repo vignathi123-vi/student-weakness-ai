@@ -10,24 +10,24 @@ Marks alone don't tell a student or teacher why a mistake happened. Two students
 
 ## How it works
 
-1. **Question Bank** — each question is pre-tagged with the specific concept it tests, plus the key terms/values a correct answer must contain.
-2. **Answer Matching** — a student's typed answer is checked against the required elements for that question (full match / partial match / missing).
-3. **Concept-Level Diagnosis** — results are aggregated by concept (not by topic), producing a status (Strong / Partial Gap / Weak) and a specific reason.
+1. **Question Bank** each question is pre-tagged with the specific concept it tests, plus the key terms/values a correct answer must contain.
+2. **Answer Matching** a student's typed answer is checked against the required elements for that question (full match / partial match / missing).
+3. **Concept-Level Diagnosis** results are aggregated by concept (not by topic), producing a status (Strong / Partial Gap / Weak) and a specific reason.
 
 ## Example
 
 Given a student's answers to 8 questions across 4 concepts (factorials, angle-sum property, trig table values, quadratic formula application), the agent correctly distinguishes:
 
-- A student who is genuinely weak in two concepts (missing steps entirely)
-- A student who gets the method right but the final value wrong (a calculation slip, not a conceptual gap) — flagged differently from a true gap
+ A student who is genuinely weak in two concepts (missing steps entirely)
+ A student who gets the method right but the final value wrong (a calculation slip, not a conceptual gap) — flagged differently from a true gap
 
 ## Tech stack
 
-- **Backend:** Python, Flask (REST API)
-- **Matching engine:** rule-based text matching against a pre-tagged question bank
-- **Frontend:** plain HTML/CSS/JS (no framework) — question form + diagnosis report
-- **Deployment:** Render (free tier)
-- **Prior phase:** an earlier ML model (Extra Trees Classifier, 86.7% accuracy) trained on simulated topic-level answer-sheet data, kept in this repo under weak_topic_model_training.ipynb as the foundational experiment this project grew out of.
+ **Backend:** Python, Flask (REST API)
+ **Matching engine:** rule-based text matching against a pre-tagged question bank
+ **Frontend:** plain HTML/CSS/JS (no framework) — question form + diagnosis report
+ **Deployment:** Render (free tier)
+ **Prior phase:** an earlier ML model (Extra Trees Classifier, 86.7% accuracy) trained on simulated topic-level answer-sheet data, kept in this repo under weak_topic_model_training.ipynb as the foundational experiment this project grew out of.
 
 ## Project structure
 
